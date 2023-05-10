@@ -21,7 +21,16 @@ class Builder2:
         self.arg_data = arg_data
         self.csv_data = csv_data
         self.json_data = json_data
-        self.ouput_file = Path(self.arg_data.get("file"),"").stem + "_sbom.json"
+        self.arg_format = arg_data.get("output_format")
+
+        if self.arg_format != ("xml" or "json"):
+           self.arg_format = "json"
+           
+
+        self.ouput_file  = Path(self.arg_data.get("file"),"").stem + "_sbom." + self.arg_format
+        self.output_format = OutputFormat.XML if self.arg_format == "xml" else OutputFormat.JSON
+
+
 
 
     def get_hash_algo(self, algorithm):
@@ -334,7 +343,9 @@ class Builder2:
                     components=components,
                     metadata=metadata
             )
-        outputter: BaseOutput = get_instance(bom=bom, output_format=OutputFormat.JSON)
+        
+        outputter: BaseOutput = get_instance(bom=bom, output_format=self.output_format)
+
         print("sbom assembled, outputting to {}".format(self.ouput_file))
         #outputter.output_to_file(self.ouput_file)
         try:

@@ -33,6 +33,7 @@ class Parser:
         parser.add_argument("-t", type=str, required=True, help="sbom type")
         parser.add_argument("-pn", type=str, required=True, help="sbom component name")
         parser.add_argument("-pv", type=str, required=True, help="sbom component version")
+       
 
         #optional arguements
         parser.add_argument("-mn", type=str, required=False, help="manufacturer name (optional)", default=None)
@@ -41,6 +42,8 @@ class Parser:
         parser.add_argument("-cw", type=bool, required=False, help="cpe wildcard (optional)" , default=None)
         parser.add_argument("-ap", type=bool, required=False, help="add purl (optional)", default=False)
         parser.add_argument("-cnt", type=bool, required=False, help="csv no title (optional)", default=False)
+        parser.add_argument("-o", type=str, required=False, help="give output format", default="json")
+
 
         args=parser.parse_args()
     
@@ -54,6 +57,8 @@ class Parser:
             parameters["sbom_type"] = args.t
             parameters["sbom_name"] = args.pn
             parameters["sbom_version"] = args.pv
+            parameters["output_format"] = args.o
+            
         except Exception as err:
             print(err)
             print("exiting...")
