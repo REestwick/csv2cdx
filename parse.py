@@ -10,7 +10,7 @@ import re
 from packageurl import PackageURL
 from pathlib import Path
 import argparse
-
+from jsonutils import Auto_Builder
 
 
 
@@ -97,6 +97,20 @@ class Parser:
         return file_data
 
 
+    #get json data from csv
+    def create_json_data(self, dataframe) -> dict:
+        print("auto parsing .csv file and creating auto_config.json") 
+        parse_data = Auto_Builder(dataframe)
+        data = parse_data.assemble()
+        response = input("auto_config.json created, proceed? (Y/N):    ")
+        if response == ("y" or "Y"):
+            print("continuing...")
+            return data
+        else:
+            print("exiting...")
+            exit(0)
+
+
     #reads csv
     def read_csv(self, file) -> pd.DataFrame: 
 
@@ -105,7 +119,6 @@ class Parser:
             index = [x for x in range(len(csv_df.columns))]
             print("no column names, assigning headers based on column index")
             csv_df.columns = index
-        
         else:
             csv_df = self.parse_csv(file, header=0) 
         
@@ -125,8 +138,11 @@ class Parser:
     def get_data(self) -> dict:
         self.arg_data = self.get_args()
         self.csv_data = self.read_csv(self.arg_data.get("file"))
-        self.json_data = self.read_json(self.arg_data.get("json"))
-
+        if self.arg_data.get("json") == "?" and self.arg_data.get("csv_no_title") == False:
+            out_data = self.create_json_data(self.csv_data)
+            self.json_data = self.read_json("auto_build.json")
+        else:
+            self.json_data = self.read_json(self.arg_data.get("json"))
         return self.arg_data, self.csv_data, self.json_data
 
                                                                                                                                                                                                                                                                                                                                                                                                       
