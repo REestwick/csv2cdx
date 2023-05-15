@@ -147,10 +147,12 @@ class Auto_Builder:
         print(f"managed to populate {int(perc_filled)}% of total config template, using {int(perc_extracted)}% of .csv columns")
         if int(perc_extracted) < 100:
              print("further manual population may be neccessary")
-        json_data = json.dumps(output_dict, indent=4)
+        config_dict["component_configuration"] = output_dict
+        json_data = json.dumps(config_dict, indent=4)
         with open("auto_build.json", "w") as file:
             file.write(json_data)
-        return output_dict
+
+        return config_dict
 
 
 
