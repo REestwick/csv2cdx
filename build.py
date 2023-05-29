@@ -23,10 +23,12 @@ class Builder2:
         self.csv_data = csv_data
         self.json_data = json_data
         self.api_config = self.json_data.get("api")
-        if self.api_config is not None and self.arg_data.get("use_api") is True:
-            self.api_url = self.api_config.get("url") 
-            self.api_access_key = self.api_config.get("access_key")
-            self.api_secret_key = self.api_config.get("secret_key")
+        if self.arg_data.get("use_api") is True:
+            self.url_json = self.json_data.get("api_url")
+            self.url_arg = self.arg_data.get("api_url")
+            self.api_url = self.url_arg if self.url_arg is not None else self.url_json
+            self.api_access_key = self.arg_data.get("access_key")
+            self.api_secret_key = self.arg_data.get("secret_key")
             if self.api_url is not None and self.api_access_key is not None and self.api_secret_key is not None:
                 self.api = cybeats_API(api_url=self.api_url, access_key=self.api_access_key, secret_key=self.api_secret_key, package_type=arg_data.get("package_type"))
             else:
