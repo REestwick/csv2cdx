@@ -24,7 +24,9 @@ class Builder2:
         self.json_data = json_data
         self.api_config = self.json_data.get("api")
         if self.arg_data.get("use_api") is True:
-            self.api_url = self.json_data.get("api_url")
+            self.url_json = self.json_data.get("api_url")
+            self.url_arg = self.arg_data.get("api_url")
+            self.api_url = self.url_arg if self.url_arg is not None else self.url_json
             self.api_access_key = self.arg_data.get("access_key")
             self.api_secret_key = self.arg_data.get("secret_key")
             if self.api_url is not None and self.api_access_key is not None and self.api_secret_key is not None:
