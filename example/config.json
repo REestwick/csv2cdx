@@ -8,7 +8,13 @@
     "purl": "purl",
     "mime_type": "mime_type",
     "description": "description",
-    "author": "author",
+    "authors": [
+        {
+            "author_name":"author",
+            "author_email":null,
+            "author_phone":null
+        }  
+    ],
     "cpe": "cpe",
     "copyright": "copyright",
     "supplier": {

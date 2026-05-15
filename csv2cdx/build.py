@@ -2,8 +2,9 @@ import pandas as pd
 from cyclonedx.model.bom import Bom, BomMetaData
 from cyclonedx.model.component import ComponentType, Component
 from cyclonedx.model import XsUri
-from cyclonedx.model import HashAlgorithm, HashType, ExternalReference, ExternalReferenceType, Tool
-from cyclonedx.factory.license import LicenseFactory
+from cyclonedx.model import HashAlgorithm, HashType, ExternalReference, ExternalReferenceType
+from cyclonedx.model.tool import Tool
+from cyclonedx.contrib.license.factories import LicenseFactory
 from cyclonedx.model.license import LicenseExpression
 from packageurl import PackageURL
 from cyclonedx.model.contact import OrganizationalEntity, OrganizationalContact
@@ -143,7 +144,27 @@ class Builder:
              contacts = None
         return contacts
             
-    
+    def get_authors(self, config_data, csv_data) -> list:
+        authors = []
+        for author in config_data.get("authors"):
+            name = self.get_val('author_name', csv_data, author)
+            email = self.get_val('author_email', csv_data, author)
+            phone = self.get_val('author_phone', csv_data, author)
+            if not (name or email or phone):
+                 continue
+            authors.append(
+                                OrganizationalContact(
+                                                        name=name,
+                                                        email=email,
+                                                        phone=phone
+                                                    )
+                            )
+        authors = [x for x in authors if x is not None]
+        if authors is []:
+             authors = None
+        return authors
+             
+   
     def get_component(self, csv_data:pd.Series, config_data:dict) -> Component:
             component = Component(name='name')
             for key in configs.keys():
@@ -168,6 +189,9 @@ class Builder:
 
             exrefs = self.get_exrefs(config_data, csv_data)
             setattr(component, 'external_references', exrefs)
+
+            authors = self.get_authors(config_data, csv_data)
+            setattr(component, 'authors', authors)
 
             if supp_dict := config_data.get("supplier"):
                 contact_list = supp_dict.get("supplier_contacts")
@@ -268,25 +292,44 @@ class Builder:
                                     supplier=metadata_supplier
 
                                 )
-            metadata.tools.add(
-                                Tool(
-                                        name="csv2cdx",
-                                        version=csv2cdx.__version__,
-                                        vendor="Cybeats Technologies",
-                                        external_references=[
-                                            ExternalReference(
-                                                type=ExternalReferenceType.VCS,
-                                                url=XsUri('https://github.com/cybeats/csv2cdx')
-                                            ),
+            # metadata.tools.add(
+            #                     Tool(
+            #                             name="csv2cdx",
+            #                             version=csv2cdx.__version__,
+            #                             vendor="Cybeats Technologies",
+            #                             external_references=[
+            #                                 ExternalReference(
+            #                                     type=ExternalReferenceType.VCS,
+            #                                     url=XsUri('https://github.com/cybeats/csv2cdx')
+            #                                 ),
 
-                                            ExternalReference(
-                                                type=ExternalReferenceType.WEBSITE,
-                                                url=XsUri('https://github.com/cybeats/csv2cdx/#readme')
-                                            )
+            #                                 ExternalReference(
+            #                                     type=ExternalReferenceType.WEBSITE,
+            #                                     url=XsUri('https://github.com/cybeats/csv2cdx/#readme')
+            #                                 )
 
-                                        ]
+            #                             ]
+            #                         )
+            #                 )
+            metadata.tools.components.add(
+                                        Component(
+                                                    name="csv2vex",
+                                                    version=csv2cdx.__version__,
+                                                    publisher="CyBeats Technologies Inc",
+                                                    type=ComponentType.APPLICATION,
+                                                    external_references=[
+                                                                                        ExternalReference(
+                                                                                            type=ExternalReferenceType.VCS,
+                                                                                            url=XsUri('https://github.com/cybeats/csv2cdx')
+                                                                                        ),
+                                                                                        ExternalReference(
+                                                                                            type=ExternalReferenceType.WEBSITE,
+                                                                                            url=XsUri('https://github.com/cybeats/csv2cdx/#readme')
+                                                                                        )
+                                                                        ]
+                                                )
+                                            
                                     )
-                            )
             
             components=self.assemble_components(self.csv_data, self.json_data)
             components = [i for i in components if i is not None]
@@ -302,7 +345,7 @@ class Builder:
             out:BaseOutput = make_outputter(
                                                 bom=bom, 
                                                 output_format=self.output_format, 
-                                                schema_version=SchemaVersion.V1_5,
+                                                schema_version=SchemaVersion.V1_7,
                                                 
                                             )
                         
